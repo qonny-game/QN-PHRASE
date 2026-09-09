@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>QN PHRASE 0.14.1</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="appHeader">
+  <div id="appHeaderText">
+    <h1 id="appLogo"><span id="appLogoQN">QN</span>PHRASE <span id="appVersion">v0.14.1</span></h1>
+  </div>
+  <div id="headerControls">
+    <div class="header-btn-wrapper" id="qnNavGroup">
+      <a class="qn-nav-btn" data-qn-app="player" href="https://qonny-game.github.io/QN-PLAYER/" title="QNPLAYER" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+        <span>PLAYER</span>
+      </a>
+      <a class="qn-nav-btn" data-qn-app="tuner" href="https://qonny-game.github.io/QN-TUNER/" title="QNTUNER" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M9 3v6.28A3.5 3.5 0 1 0 11 12.7V7h4V3H9zm7 8h-2v10h2V11zm-8 0H6v10h2V11z"/></svg>
+        <span>TUNER</span>
+      </a>
+      <a class="qn-nav-btn" data-qn-app="tempo" href="https://qonny-game.github.io/QN-TEMPO/" title="QNTEMPO" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M9 2v2h6V2h2v2.06c1.14.2 2 1.2 2 2.4 0 .77-.35 1.46-.9 1.92L20 20H4l1.9-11.62A2.5 2.5 0 0 1 5 6.46c0-1.2.86-2.2 2-2.4V2h2zm2.6 6.5-1.9 9.9h2.6l1.6-8.4-2.3-1.5z"/></svg>
+        <span>TEMPO</span>
+      </a>
+      <a class="qn-nav-btn" data-qn-app="phrase" href="https://qonny-game.github.io/QN-PHRASE/" title="QNPHRASE" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M7 2v20l13-10L7 2z"/></svg>
+        <span>PHRASE</span>
+      </a>
+    </div>
+    <div class="header-btn-wrapper">
+      <button id="settingsBtn" title="Settings">
+        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+        <span>SET</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Key / Scale / Position quick bar -->
+<div class="control-bar">
+  <button class="control-chip" id="barsChip">
+    <span class="chip-label">BARS</span>
+    <span class="chip-value" id="barsChipValue">4</span>
+  </button>
+  <button class="control-chip" id="keyChip">
+    <span class="chip-label">KEY</span>
+    <span class="chip-value" id="keyChipValue">C</span>
+  </button>
+  <button class="control-chip" id="scaleChip">
+    <span class="chip-label">SCALE</span>
+    <span class="chip-value" id="scaleChipValue">Major</span>
+  </button>
+  <button class="control-chip" id="positionChip">
+    <span class="chip-label">POS</span>
+    <span class="chip-value" id="positionChipValue">1-5F</span>
+  </button>
+</div>
+
+<!-- Bars picker -->
+<div class="av-popup-backdrop" id="barsBackdrop"></div>
+<div class="av-popup" id="barsPopup">
+  <p class="popup-title">Bars</p>
+  <div class="choice-grid" id="barsGrid"></div>
+  <button class="popup-close-btn" id="barsCloseBtn">Done</button>
+</div>
+
+<!-- Chord progression + TAB, grouped per bar -->
+<div class="prog-wrap">
+  <div class="prog-header">
+    <span class="stage-meta-label">CHORD &amp; PHRASE</span>
+    <div class="prog-header-actions">
+      <div class="chord-display-toggle" id="chordDisplayToggle">
+        <button type="button" class="chord-display-btn selected" data-display="degree">Degree</button>
+        <button type="button" class="chord-display-btn" data-display="absolute">Note</button>
+      </div>
+      <div class="chord-display-toggle" id="tabDisplayToggle">
+        <button type="button" class="chord-display-btn selected" data-display="fret">Fret</button>
+        <button type="button" class="chord-display-btn" data-display="degree">Degree</button>
+      </div>
+      <button class="meta-inline-btn" id="progClearBtn">
+        <span>CLEAR</span>
+      </button>
+    </div>
+  </div>
+  <div class="bar-blocks" id="barBlocks"></div>
+</div>
+
+<div class="generate-row">
+  <button id="generateBtn" class="generate-btn">
+    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 15l-4-4h3V8h2v6h3l-4 4z" transform="rotate(180 12 12)"/><path d="M12 4l1.5 4.5H18l-3.6 2.6L15.8 16 12 13.3 8.2 16l1.4-4.9L6 8.5h4.5z"/></svg>
+    <span>GENERATE PHRASE</span>
+  </button>
+  <button id="saveBtn" class="save-btn" title="Save this phrase to your stock">
+    <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+  </button>
+  <button id="stockBtn" class="save-btn" title="Saved phrases">
+    <svg viewBox="0 0 24 24"><path d="M20.54 5.23 19.15 3.55C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5 6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.82-1h12l.93 1H5.12z"/></svg>
+  </button>
+</div>
+
+<!-- Key picker -->
+<div class="av-popup-backdrop" id="keyBackdrop"></div>
+<div class="av-popup" id="keyPopup">
+  <p class="popup-title">Key</p>
+  <div class="choice-grid choice-grid-12" id="keyGrid"></div>
+  <button class="popup-close-btn" id="keyCloseBtn">Done</button>
+</div>
+
+<!-- Scale picker -->
+<div class="av-popup-backdrop" id="scaleBackdrop"></div>
+<div class="av-popup" id="scalePopup">
+  <p class="popup-title">Scale</p>
+  <div class="scale-choice-list" id="scaleGrid"></div>
+  <button class="popup-close-btn" id="scaleCloseBtn">Done</button>
+</div>
+
+<!-- Position picker -->
+<div class="av-popup-backdrop" id="positionBackdrop"></div>
+<div class="av-popup" id="positionPopup">
+  <p class="popup-title">Fret Position Range</p>
+  <div class="choice-grid" id="positionGrid"></div>
+  <button class="popup-close-btn" id="positionCloseBtn">Done</button>
+</div>
+
+<!-- Chord cell picker (degree + type) -->
+<div class="av-popup-backdrop" id="chordBackdrop"></div>
+<div class="av-popup" id="chordPopup">
+  <p class="popup-title"><span id="chordPickTitle">Beat 1</span></p>
+  <p class="popup-subtitle">Degree</p>
+  <div class="choice-grid choice-grid-degree" id="chordDegreeGrid"></div>
+  <p class="popup-subtitle">Type</p>
+  <div class="choice-grid choice-grid-4" id="chordTypeGrid"></div>
+  <div class="chord-popup-actions">
+    <button class="chord-clear-btn" id="chordClearBtn">Clear Beat</button>
+  </div>
+  <button class="popup-close-btn" id="chordCloseBtn">Done</button>
+</div>
+
+<!-- Manual note input (TAB cell tap): fret + note-length -->
+<div class="av-popup-backdrop" id="noteInputBackdrop"></div>
+<div class="av-popup" id="noteInputPopup">
+  <p class="popup-title"><span id="noteInputTitle">String 6 · Beat 1</span></p>
+  <p class="popup-subtitle">Fret</p>
+  <div class="fret-grid" id="fretGrid"></div>
+  <p class="popup-subtitle">Length</p>
+  <div class="note-length-toggle-row" id="noteLengthToggleRow">
+    <button type="button" class="note-length-btn" data-length="16">
+      <svg class="note-length-symbol" viewBox="0 0 24 24"><ellipse cx="12" cy="16" rx="7" ry="5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>
+      <span class="note-length-name">Whole</span>
+    </button>
+    <button type="button" class="note-length-btn" data-length="8">
+      <svg class="note-length-symbol" viewBox="0 0 24 24"><ellipse cx="9" cy="17" rx="6" ry="4.3" fill="none" stroke="currentColor" stroke-width="2.2"/><line x1="14.5" y1="17" x2="14.5" y2="3" stroke="currentColor" stroke-width="2.2"/></svg>
+      <span class="note-length-name">Half</span>
+    </button>
+    <button type="button" class="note-length-btn" data-length="4">
+      <svg class="note-length-symbol" viewBox="0 0 24 24"><ellipse cx="9" cy="17" rx="6" ry="4.3" fill="currentColor"/><line x1="14.5" y1="17" x2="14.5" y2="3" stroke="currentColor" stroke-width="2.2"/></svg>
+      <span class="note-length-name">Quarter</span>
+    </button>
+    <button type="button" class="note-length-btn" data-length="2">
+      <svg class="note-length-symbol" viewBox="0 0 24 24"><ellipse cx="8" cy="18" rx="5.5" ry="4" fill="currentColor"/><line x1="13" y1="18" x2="13" y2="4" stroke="currentColor" stroke-width="2.2"/><path d="M13 4 Q19 6 17 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      <span class="note-length-name">8th</span>
+    </button>
+    <button type="button" class="note-length-btn" data-length="1">
+      <svg class="note-length-symbol" viewBox="0 0 24 24"><ellipse cx="8" cy="18" rx="5.5" ry="4" fill="currentColor"/><line x1="13" y1="18" x2="13" y2="4" stroke="currentColor" stroke-width="2.2"/><path d="M13 4 Q19 6 17 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13 8 Q19 10 17 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="note-length-name">16th</span>
+    </button>
+  </div>
+  <div class="note-length-total-row">
+    <span>Total:</span>
+    <span id="noteLengthTotal">1</span>
+    <span>steps</span>
+  </div>
+  <div class="note-input-actions-row">
+    <button class="chord-clear-btn" id="noteClearBtn">Clear Note</button>
+    <button class="popup-close-btn" id="noteInputConfirmBtn">Set</button>
+  </div>
+</div>
+
+<!-- Settings popup (tempo etc live in bottom transport; this holds misc settings) -->
+<div class="av-popup-backdrop" id="settingsBackdrop"></div>
+<div class="av-popup" id="settingsPopup">
+  <p class="popup-title">Settings</p>
+
+  <p class="popup-subtitle">Melody Volume</p>
+  <div class="volume-row">
+    <input type="range" min="0" max="100" value="80" class="volume-slider" id="melodyVolumeSlider">
+    <span class="volume-value" id="melodyVolumeValue">80%</span>
+  </div>
+  <p class="popup-subtitle">Chord Volume</p>
+  <div class="volume-row">
+    <input type="range" min="0" max="100" value="60" class="volume-slider" id="chordVolumeSlider">
+    <span class="volume-value" id="chordVolumeValue">60%</span>
+  </div>
+  <p class="popup-subtitle">Rhythm Feel</p>
+  <div class="choice-grid" id="rhythmFeelGrid"></div>
+  <p class="popup-subtitle">Metronome on Playback</p>
+  <div class="choice-grid" id="metronomeToggleGrid"></div>
+  <p class="popup-subtitle">Chord Tones on Playback</p>
+  <div class="choice-grid" id="chordToneToggleGrid"></div>
+  <button class="popup-close-btn" id="settingsCloseBtn">Done</button>
+</div>
+
+<!-- Save name input popup -->
+<div class="av-popup-backdrop" id="saveNameBackdrop"></div>
+<div class="av-popup" id="saveNamePopup">
+  <p class="popup-title">Save Phrase</p>
+  <input type="text" id="saveNameInput" class="save-name-input" placeholder="Phrase name" maxlength="30">
+  <button class="popup-close-btn" id="saveNameConfirmBtn">Save</button>
+</div>
+
+<!-- Stock (saved phrases) list popup -->
+<div class="av-popup-backdrop" id="stockBackdrop"></div>
+<div class="av-popup" id="stockPopup">
+  <p class="popup-title">Stock</p>
+  <div class="stock-filter-row" id="stockFilterRow">
+    <button class="stock-filter-btn selected" data-filter="all">All</button>
+    <button class="stock-filter-btn" data-filter="favorite">★ Favorites</button>
+  </div>
+  <div class="stock-list" id="stockList"></div>
+  <button class="popup-close-btn" id="stockCloseBtn">Close</button>
+</div>
+
+<!-- Bottom fixed transport -->
+<div class="top-controls" id="topControls">
+  <div class="tempo-name-row">
+    <span id="bpmVal">120</span><span class="bpm-unit">BPM</span>
+    <span id="tempoName">Moderato</span>
+  </div>
+  <div class="top-controls-row">
+    <div class="tripleNavBtn" title="BPM / Play">
+      <button id="bpmMinus2" class="tripleNavBtn-third tripleNavBtn-left" title="BPM -1">
+        <svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>
+        <span class="top-controls-btn-label">BPM</span>
+      </button>
+      <span class="tripleNavBtn-divider"></span>
+      <button id="playToggle" class="tripleNavBtn-third tripleNavBtn-center" title="Play / Stop">
+        <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <span class="top-controls-btn-label">Play</span>
+      </button>
+      <span class="tripleNavBtn-divider"></span>
+      <button id="bpmPlus2" class="tripleNavBtn-third tripleNavBtn-right" title="BPM +1">
+        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        <span class="top-controls-btn-label">BPM</span>
+      </button>
+    </div>
+    <button id="metroToggle" class="loopbtn" title="Metronome click">
+      <svg viewBox="0 0 24 24"><path d="M9 2v2h6V2h2v2.06c1.14.2 2 1.2 2 2.4 0 .77-.35 1.46-.9 1.92L20 20H4l1.9-11.62A2.5 2.5 0 0 1 5 6.46c0-1.2.86-2.2 2-2.4V2h2z"/></svg>
+      <span class="top-controls-btn-label">Click</span>
+    </button>
+  </div>
+</div>
+<div class="top-controls-spacer" id="topControlsSpacer"></div>
+
+<script src="theory.js"></script>
+<script src="app.js"></script>
+<script src="qn-nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,1000 @@
+/* ============================================================
+   style.css — QNPHRASE
+   QNTEMPO/QNAUDIOのデザイントークン・コンポーネントをそのまま踏襲。
+   スマホ専用単一レイアウト。
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --accent-primary: #3b82f6;
+  --accent-secondary: #1d4ed8;
+  --accent-glow: rgba(59, 130, 246, 0.35);
+  --accent-hover-1: #2563eb;
+  --accent-hover-2: #1e40af;
+  --font-display: 'Instrument Sans';
+  --font-body: 'Instrument Sans';
+
+  --ease-snap: cubic-bezier(0.2, 0, 0, 1);
+  --ease-glide: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-dismiss: cubic-bezier(0.4, 0, 1, 1);
+
+  --dur-hover: 130ms;
+  --dur-press: 100ms;
+  --dur-open: 240ms;
+  --dur-dismiss: 200ms;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html {
+  touch-action: pan-x pan-y;
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  height: 100dvh;
+  overflow: hidden;
+  background: #0d0d0f;
+  color: #f0f0f3;
+  font-family: var(--font-body, 'Instrument Sans'), -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0;
+  padding: 24px 24px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  user-select: none;
+}
+
+/* ---------- Header ---------- */
+#appHeader {
+  width: 100%;
+  max-width: 1400px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  position: relative;
+  z-index: 200;
+  flex-shrink: 0;
+}
+
+#appHeaderText { min-width: 0; }
+
+#appLogo {
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin: 0 0 4px;
+  color: #f0f0f3;
+  text-transform: uppercase;
+}
+
+#appLogoQN { color: var(--accent-primary); }
+
+#appVersion {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: #6b6b7b;
+  text-transform: none;
+  vertical-align: middle;
+}
+
+#headerControls {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-btn-wrapper { position: relative; }
+
+#qnNavGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.qn-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  background: #16161b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  cursor: pointer;
+  color: #f0f0f3;
+  text-decoration: none;
+  transition: background var(--dur-hover) var(--ease-snap), border-color var(--dur-hover) var(--ease-snap), color var(--dur-hover) var(--ease-snap), transform var(--dur-press) var(--ease-snap);
+}
+.qn-nav-btn svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
+.qn-nav-btn span { display: none; }
+.qn-nav-btn:hover { background: #1c1c24; border-color: var(--accent-primary); color: var(--accent-primary); }
+.qn-nav-btn:active { transform: scale(0.96); }
+.qn-nav-btn.current {
+  cursor: default;
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  background: var(--accent-glow);
+}
+.qn-nav-btn.current:hover { transform: none; }
+
+#settingsBtn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #16161b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  cursor: pointer;
+  color: #f0f0f3;
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: background var(--dur-hover) var(--ease-snap), border-color var(--dur-hover) var(--ease-snap), color var(--dur-hover) var(--ease-snap), transform var(--dur-press) var(--ease-snap);
+}
+#settingsBtn:active { transform: scale(0.96); }
+#settingsBtn:hover { background: #1c1c24; border-color: var(--accent-primary); color: var(--accent-primary); }
+#settingsBtn svg { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
+
+/* ---------- Control bar: Key / Scale / Position chips ---------- */
+.control-bar {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  flex-shrink: 0;
+}
+
+#barsChip { flex: 0.75; }
+#scaleChip .chip-value { font-size: 20px; }
+
+.control-chip {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 12px 12px 14px;
+  border-radius: 14px;
+  background: #16161b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: background var(--dur-hover) var(--ease-snap), border-color var(--dur-hover) var(--ease-snap), transform var(--dur-press) var(--ease-snap);
+}
+.control-chip:active { transform: scale(0.97); }
+
+.chip-label {
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #6b6b7b;
+}
+
+.chip-value {
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  color: #f0f0f3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  line-height: 1.1;
+}
+
+/* ---------- Chord progression grid ---------- */
+.prog-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin-top: 18px;
+}
+
+.prog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.prog-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.chord-display-toggle {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.chord-display-btn {
+  padding: 6px 9px;
+  background: #1c1c24;
+  color: #6b6b7b;
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  border: none;
+}
+.chord-display-btn:active { transform: scale(0.95); }
+.chord-display-btn.selected { background: var(--accent-primary); color: #fff; }
+
+.stage-meta-label {
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #55555f;
+}
+
+.meta-inline-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: #1c1c24;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #c8c8d0;
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+}
+.meta-inline-btn:active { transform: scale(0.95); }
+
+/* 小節ごとに「コード入力(4拍)」+「その小節のTAB」をまとめたブロックを縦に並べる。
+   全体を1つの縦スクロールコンテナに収め、画面幅いっぱいに均等表示する。 */
+.bar-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding-bottom: 4px;
+}
+
+.bar-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.bar-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bar-block-num {
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #55555f;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.bar-block-chord-label {
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+
+.prog-bar-row {
+  display: flex;
+  gap: 3px;
+  align-items: stretch;
+}
+
+.prog-cell {
+  flex: 1;
+  min-width: 0;
+  aspect-ratio: 1 / 0.42;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #1c1c24;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #6b6b7b;
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background var(--dur-hover) var(--ease-snap), border-color var(--dur-hover) var(--ease-snap), color var(--dur-hover) var(--ease-snap);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.prog-cell.filled {
+  background: var(--accent-glow);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+.prog-cell:active { transform: scale(0.94); }
+.prog-cell.playing {
+  border-color: #f0f0f3;
+  box-shadow: 0 0 0 2px rgba(240, 240, 243, 0.3);
+}
+
+/* ---------- 小節ごとのTAB表示エリア ---------- */
+.bar-block-tab {
+  background: #16161b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  min-height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 0;
+  position: relative;
+}
+.bar-block-tab-empty {
+  color: #55555f;
+  font-family: var(--font-body, 'Instrument Sans'), sans-serif;
+  font-size: 12px;
+  text-align: center;
+  padding: 16px;
+}
+
+.tab-bar-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  padding: 8px 12px;
+}
+
+/* ---------- Generate button ---------- */
+.generate-row {
+  flex-shrink: 0;
+  margin: 14px 0;
+  display: flex;
+  gap: 8px;
+}
+
+.generate-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  border: none;
+  color: #fff;
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 6px 20px var(--accent-glow);
+  transition: transform var(--dur-press) var(--ease-snap);
+}
+.generate-btn:active { transform: scale(0.97); }
+.generate-btn svg { width: 20px; height: 20px; fill: currentColor; flex-shrink: 0; }
+
+.save-btn {
+  flex-shrink: 0;
+  width: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: #16161b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f0f0f3;
+  cursor: pointer;
+  transition: background var(--dur-hover) var(--ease-snap), border-color var(--dur-hover) var(--ease-snap), transform var(--dur-press) var(--ease-snap);
+}
+.save-btn:active { transform: scale(0.94); }
+.save-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+.save-btn svg { width: 22px; height: 22px; fill: currentColor; }
+
+/* ---------- Save name input popup ---------- */
+.save-name-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #1c1c24;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f0f0f3;
+  font-family: var(--font-body, 'Instrument Sans'), sans-serif;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+.save-name-input::placeholder { color: #55555f; }
+.save-name-input:focus { outline: none; border-color: var(--accent-primary); }
+
+/* ---------- Stock (saved phrases) list ---------- */
+.stock-filter-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.stock-filter-btn {
+  flex: 1;
+  padding: 10px 4px;
+  text-align: center;
+  border-radius: 10px;
+  background: #1c1c24;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #8b8b9e;
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.stock-filter-btn.selected {
+  background: var(--accent-glow);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+.stock-filter-btn:active { transform: scale(0.96); }
+
+.stock-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+.stock-empty {
+  text-align: center;
+  padding: 24px 0;
+  color: #55555f;
+  font-family: var(--font-body, 'Instrument Sans'), sans-serif;
+  font-size: 13px;
+}
+.stock-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px 12px 14px;
+  border-radius: 12px;
+  background: #1c1c24;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+}
+.stock-row-main {
+  flex: 1;
+  min-width: 0;
+}
+.stock-row-name {
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #f0f0f3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stock-row-meta {
+  font-family: var(--font-body, 'Instrument Sans'), sans-serif;
+  font-size: 11px;
+  color: #6b6b7b;
+  margin-top: 2px;
+}
+.stock-row-fav {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: #55555f;
+  cursor: pointer;
+  font-size: 18px;
+}
+.stock-row-fav.active { color: #f5b400; }
+.stock-row-fav:active { transform: scale(0.9); }
+.stock-row-delete {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: #55555f;
+  cursor: pointer;
+  font-size: 16px;
+}
+.stock-row-delete:active { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+
+/* ---------- Popups (shared with QNTEMPO patterns) ---------- */
+.av-popup {
+  display: none;
+  position: fixed;
+  left: 20px;
+  right: 20px;
+  bottom: 0;
+  z-index: 350;
+  background: #16161b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: none;
+  border-radius: 20px 20px 0 0;
+  padding: 18px 18px calc(18px + env(safe-area-inset-bottom));
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translateY(100%);
+  transition: opacity var(--dur-open) var(--ease-dismiss), transform var(--dur-open) var(--ease-dismiss);
+}
+.av-popup.open {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--dur-open) var(--ease-pop), transform var(--dur-open) var(--ease-pop);
+}
+
+.av-popup-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 340;
+  background: rgba(5, 5, 7, 0);
+  transition: background var(--dur-open) var(--ease-dismiss);
+}
+.av-popup-backdrop.open {
+  display: block;
+  background: rgba(5, 5, 7, 0.6);
+  transition: background var(--dur-open) var(--ease-pop);
+}
+
+.popup-title {
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #6b6b7b;
+  margin: 0 0 14px;
+}
+
+.popup-subtitle {
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #6b6b7b;
+  margin: 14px 0 8px;
+}
+
+/* ---------- Volume sliders (Settings popup) ---------- */
+.volume-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.volume-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: #1c1c24;
+  outline: none;
+  cursor: pointer;
+}
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  box-shadow: 0 2px 8px var(--accent-glow);
+  cursor: pointer;
+  border: none;
+}
+.volume-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  box-shadow: 0 2px 8px var(--accent-glow);
+  cursor: pointer;
+  border: none;
+}
+.volume-slider::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: #1c1c24;
+}
+
+.volume-value {
+  flex-shrink: 0;
+  width: 42px;
+  text-align: right;
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.choice-grid-12 { grid-template-columns: repeat(4, 1fr); }
+.choice-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.choice-grid-degree { grid-template-columns: repeat(4, 1fr); }
+
+.choice-cell {
+  padding: 13px 4px;
+  text-align: center;
+  border-radius: 12px;
+  background: #1c1c24;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #c8c8d0;
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--dur-hover) var(--ease-snap), border-color var(--dur-hover) var(--ease-snap), color var(--dur-hover) var(--ease-snap);
+}
+.choice-cell.selected {
+  background: var(--accent-glow);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+.choice-cell:active { transform: scale(0.94); }
+
+/* スケール一覧は縦リスト（種類が多いため） */
+.scale-choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.scale-choice-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #1c1c24;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #c8c8d0;
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--dur-hover) var(--ease-snap), border-color var(--dur-hover) var(--ease-snap), color var(--dur-hover) var(--ease-snap);
+}
+.scale-choice-row.selected {
+  background: var(--accent-glow);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+.scale-choice-row:active { transform: scale(0.98); }
+.scale-choice-row .sc-formula {
+  font-size: 10px;
+  font-weight: 500;
+  color: #55555f;
+  font-variant-numeric: tabular-nums;
+}
+.scale-choice-row.selected .sc-formula { color: var(--accent-hover-1); }
+
+.chord-popup-actions { margin-top: 14px; }
+
+/* ---------- Manual note input popup (TAB cell tap) ---------- */
+/* 0〜21フレットをボタングリッドで選択 */
+.fret-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  margin-bottom: 10px;
+}
+@media (min-width: 640px) {
+  .fret-grid {
+    grid-template-columns: repeat(10, 1fr);
+  }
+}
+.fret-cell {
+  aspect-ratio: 1 / 0.62;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #1c1c24;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #c8c8d0;
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--dur-hover) var(--ease-snap), border-color var(--dur-hover) var(--ease-snap), color var(--dur-hover) var(--ease-snap);
+}
+.fret-cell.selected {
+  background: var(--accent-glow);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+.fret-cell:active { transform: scale(0.94); }
+
+.note-length-toggle-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  margin-bottom: 10px;
+}
+.note-length-btn {
+  aspect-ratio: 1 / 0.9;
+  padding: 6px 2px;
+  text-align: center;
+  border-radius: 8px;
+  background: #1c1c24;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #c8c8d0;
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  cursor: pointer;
+  transition: background var(--dur-hover) var(--ease-snap), border-color var(--dur-hover) var(--ease-snap), color var(--dur-hover) var(--ease-snap);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.note-length-symbol {
+  width: 18px;
+  height: 18px;
+  color: #c8c8d0;
+  transition: color var(--dur-hover) var(--ease-snap);
+}
+.note-length-btn.selected .note-length-symbol { color: var(--accent-primary); }
+.note-length-name {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.note-length-btn.selected {
+  background: var(--accent-glow);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+.note-length-btn:active { transform: scale(0.94); }
+
+.note-length-total-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 2px;
+  font-family: var(--font-body, 'Instrument Sans'), sans-serif;
+  font-size: 12px;
+  color: #6b6b7b;
+}
+#noteLengthTotal {
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--accent-primary);
+}
+
+/* ---------- TAB manual input hit areas ---------- */
+.tab-hit-cell {
+  cursor: pointer;
+  fill: transparent;
+  transition: fill 80ms ease;
+}
+.tab-hit-cell:hover {
+  fill: rgba(255, 255, 255, 0.08);
+}
+.tab-note-rect { cursor: pointer; }
+
+
+.chord-clear-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.chord-clear-btn:active { transform: scale(0.97); }
+
+.popup-close-btn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  border: none;
+  color: #fff;
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 6px 20px var(--accent-glow);
+  transition: transform var(--dur-press) var(--ease-snap);
+}
+.popup-close-btn:active { transform: scale(0.97); }
+
+/* ---------- Note input popup: Clear + Set side by side ---------- */
+.note-input-actions-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.note-input-actions-row .chord-clear-btn {
+  width: auto;
+  flex: 1;
+}
+.note-input-actions-row .popup-close-btn {
+  width: auto;
+  flex: 1;
+  margin-top: 0;
+}
+
+/* ---------- Bottom fixed transport (mirrors QNTEMPO) ---------- */
+.top-controls-spacer { flex-shrink: 0; }
+
+.top-controls {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: rgba(13, 13, 15, 0.92);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.tempo-name-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+}
+#bpmVal {
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #f0f0f3;
+  font-variant-numeric: tabular-nums;
+}
+.bpm-unit {
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #8b8b9e;
+}
+#tempoName {
+  font-family: var(--font-body, 'Instrument Sans'), sans-serif;
+  font-style: italic;
+  font-size: 12px;
+  color: #6b6b7b;
+}
+
+.top-controls-row { display: flex; gap: 8px; align-items: center; }
+
+.loopbtn {
+  flex: 1;
+  padding: 12px 0 10px;
+  font-size: 20px;
+  text-align: center;
+  background: #16161b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  cursor: pointer;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  transition: background var(--dur-hover) var(--ease-snap), border-color var(--dur-hover) var(--ease-snap), transform var(--dur-press) var(--ease-snap), box-shadow var(--dur-press) var(--ease-snap);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.loopbtn svg { width: 22px; height: 22px; fill: currentColor; }
+.loopbtn:active { transform: translateY(0) scale(0.96); box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+.loopbtn.active { color: var(--accent-primary); border-color: var(--accent-primary); background: var(--accent-glow); }
+
+.top-controls-btn-label {
+  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: inherit;
+  opacity: 0.7;
+  line-height: 1;
+}
+
+.tripleNavBtn {
+  flex: 3;
+  display: flex;
+  align-items: stretch;
+  background: #1c1c24;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+.tripleNavBtn-third {
+  flex: 1;
+  padding: 12px 0 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: background var(--dur-hover) var(--ease-snap), color var(--dur-hover) var(--ease-snap), transform var(--dur-press) var(--ease-snap);
+}
+.tripleNavBtn-center { flex: 1.3; color: var(--accent-primary); }
+.tripleNavBtn-third:active { transform: scale(0.94); background: #2a2a35; }
+.tripleNavBtn-third svg { width: 22px; height: 22px; fill: currentColor; }
+.tripleNavBtn-left { border-radius: 14px 0 0 14px; }
+.tripleNavBtn-right { border-radius: 0 14px 14px 0; }
+.tripleNavBtn-divider { width: 1px; background: rgba(255, 255, 255, 0.1); flex-shrink: 0; }
+
+#playToggle {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  border: none;
+  box-shadow: 0 6px 20px var(--accent-glow);
+  color: #fff;
+}
+#playToggle.playing {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
+}
