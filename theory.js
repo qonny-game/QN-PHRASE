@@ -86,7 +86,7 @@ function rootPcToDegree(rootPc, keyPc) {
 // 大文字/小文字でコードの長短(メジャー系/マイナー系/ディミニッシュ)を表し、
 // タイプが単純な三和音("" = メジャー, "m" = マイナー, "dim" = ディミニッシュ)
 // でない場合は、7th・sus4等のタイプラベルを常に付記する(例: "V7", "IVsus4", "iim7")。
-function degreeToRoman(degree, chordType) {
+function degreeToRoman(degree, chordType, onBassDegree) {
   const def = DEGREES[degree];
   if (!def) return "?";
   chordType = chordType || "";
@@ -103,12 +103,21 @@ function degreeToRoman(degree, chordType) {
   else if (isAugRoot) romanBase = romanBase.toUpperCase() + "+";
   else romanBase = romanBase.toUpperCase();
 
+  let result;
   // 単純な三和音("", "m", "dim", "aug")はローマ数字の大文字/小文字/記号だけで
   // 表現済みなので、タイプラベルの付記は不要。それ以外(7th, sus4, 6th等)は常に付記する。
-  if (chordType === "" || chordType === "m" || chordType === "dim" || chordType === "aug") return romanBase;
+  if (chordType === "" || chordType === "m" || chordType === "dim" || chordType === "aug") {
+    result = romanBase;
+  } else {
+    const typeLabel = CHORD_TYPES[chordType] ? CHORD_TYPES[chordType].label : "";
+    result = romanBase + typeLabel;
+  }
 
-  const typeLabel = CHORD_TYPES[chordType] ? CHORD_TYPES[chordType].label : "";
-  return romanBase + typeLabel;
+  // onBass(分数コード): "I/V" のようにベース音の度数を付記する
+  if (onBassDegree !== undefined && onBassDegree !== null && DEGREES[onBassDegree]) {
+    result += "/" + DEGREES[onBassDegree].roman.replace("°", "");
+  }
+  return result;
 }
 
 function noteIndex(name) {
@@ -374,9 +383,9 @@ function resolveChordChanges(progression) {
     const chord = resolved[i];
     if (!chord) continue;
     const prev = i > 0 ? resolved[i - 1] : null;
-    const isChange = !prev || prev.root !== chord.root || prev.type !== chord.type;
+    const isChange = !prev || prev.root !== chord.root || prev.type !== chord.type || prev.bassRoot !== chord.bassRoot;
     if (isChange) {
-      changes.push({ beatIdx: i, root: chord.root, type: chord.type, durationBeats: 1 });
+      changes.push({ beatIdx: i, root: chord.root, type: chord.type, bassRoot: chord.bassRoot, durationBeats: 1 });
     } else if (changes.length > 0) {
       changes[changes.length - 1].durationBeats++;
     }

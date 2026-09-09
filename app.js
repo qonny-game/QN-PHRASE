@@ -31,6 +31,8 @@
     isPlaying: false,
     playTimer: null,
     currentPlayBeat: 0,
+    currentStockId: null,   // 読み込み中のストックのid(SAVE時に上書き対象として使う)
+    currentStockName: null, // 同上、SAVEポップアップの初期名として使う
   };
 
   const BAR_COUNT_OPTIONS = [1, 2, 4];
@@ -68,21 +70,24 @@
   [
     "keyChip", "keyChipValue", "scaleChip", "scaleChipValue", "positionChip", "positionChipValue",
     "barsChip", "barsChipValue", "barsBackdrop", "barsPopup", "barsGrid", "barsCloseBtn",
-    "barBlocks", "progClearBtn",
+    "barBlocks",
     "tabDisplayToggle",
-    "generateBtn", "saveBtn",
-    "saveNameBackdrop", "saveNamePopup", "saveNameInput", "saveNameConfirmBtn",
+    "generateBtn", "saveBtn", "progClearBtn",
+    "transportGenerateBtn", "transportSaveBtn", "transportLoadBtn",
+    "confirmBackdrop", "confirmPopup", "confirmTitle", "confirmMessage", "confirmCancelBtn", "confirmOkBtn",
+    "saveNameBackdrop", "saveNamePopup", "saveNameInput", "saveNameConfirmBtn", "saveModeRow",
     "stockBtn", "stockBackdrop", "stockPopup", "stockFilterRow", "stockList", "stockCloseBtn",
     "keyBackdrop", "keyPopup", "keyGrid", "keyCloseBtn",
     "scaleBackdrop", "scalePopup", "scaleGrid", "scaleCloseBtn",
     "positionBackdrop", "positionPopup", "positionGrid", "positionCloseBtn",
-    "chordBackdrop", "chordPopup", "chordPickTitle", "chordDegreeGrid", "chordTypeGrid", "chordClearBtn", "chordCloseBtn",
+    "chordBackdrop", "chordPopup", "chordPickTitle", "chordDegreeGrid", "chordTypeGrid", "chordOnBassGrid", "chordClearBtn", "chordCloseBtn",
     "noteInputBackdrop", "noteInputPopup", "noteInputTitle", "fretGrid",
     "noteLengthToggleRow", "noteLengthTotal", "noteClearBtn", "noteInputConfirmBtn",
     "chordDisplayToggle",
     "settingsBtn", "settingsBackdrop", "settingsPopup", "rhythmFeelGrid", "metronomeToggleGrid", "chordToneToggleGrid", "settingsCloseBtn",
+    "hamburgerBtn", "hamburgerBackdrop", "hamburgerPopup", "hamburgerCloseBtn",
     "melodyVolumeSlider", "melodyVolumeValue", "chordVolumeSlider", "chordVolumeValue",
-    "bpmVal", "tempoName", "bpmMinus2", "bpmPlus2", "playToggle", "playIcon", "metroToggle",
+    "bpmVal", "tempoName", "bpmMinus2", "bpmPlus2", "bpmDisplayWrap", "playToggle", "playIcon", "metroToggle",
   ].forEach(id => { el[id] = document.getElementById(id); });
 
   // ---------- Popup helpers ----------
@@ -144,31 +149,16 @@
   function buildScaleGrid() {
     el.scaleGrid.innerHTML = "";
     SCALE_ORDER.forEach(key => {
-      const row = document.createElement("div");
-      row.className = "scale-choice-row";
-      if (key === state.scaleKey) row.classList.add("selected");
-
-      const label = document.createElement("span");
-      if (key === "random") {
-        label.textContent = "Random";
-      } else {
-        label.textContent = SCALES[key].label;
-      }
-      row.appendChild(label);
-
-      if (key !== "random") {
-        const formula = document.createElement("span");
-        formula.className = "sc-formula";
-        formula.textContent = SCALES[key].intervals.length + " notes";
-        row.appendChild(formula);
-      }
-
-      row.addEventListener("click", () => {
+      const cell = document.createElement("div");
+      cell.className = "choice-cell scale-choice-cell";
+      cell.textContent = key === "random" ? "Random" : SCALES[key].label;
+      if (key === state.scaleKey) cell.classList.add("selected");
+      cell.addEventListener("click", () => {
         state.scaleKey = key;
         refreshScaleChip();
         buildScaleGrid();
       });
-      el.scaleGrid.appendChild(row);
+      el.scaleGrid.appendChild(cell);
     });
   }
   function refreshScaleChip() {
@@ -261,9 +251,14 @@
     if (state.chordDisplayMode === "absolute") {
       const rootPc = degreeToRootPc(chord.degree, state.key);
       const typeLabel = CHORD_TYPES[chord.type] ? CHORD_TYPES[chord.type].label : "";
-      return NOTE_NAMES[rootPc] + typeLabel;
+      let label = NOTE_NAMES[rootPc] + typeLabel;
+      if (chord.onBass !== undefined && chord.onBass !== null) {
+        const bassPc = degreeToRootPc(chord.onBass, state.key);
+        label += "/" + NOTE_NAMES[bassPc];
+      }
+      return label;
     }
-    return degreeToRoman(chord.degree, chord.type);
+    return degreeToRoman(chord.degree, chord.type, chord.onBass);
   }
 
   // 各バーブロックのヘッダーにある「使用コード」表示を更新する(GENERATE前は空表示)
@@ -292,20 +287,48 @@
     }
   }
 
-  el.progClearBtn.addEventListener("click", () => {
-    state.progression = new Array(state.numBars * 4).fill(null);
-    refreshProgGrid();
+  // ============================================================
+  // Generic confirmation dialog (GENERATE / CLEAR で使う)
+  // ============================================================
+  let pendingConfirmAction = null;
+
+  function askConfirm(title, message, onConfirm) {
+    el.confirmTitle.textContent = title;
+    el.confirmMessage.textContent = message;
+    pendingConfirmAction = onConfirm;
+    openPopup(el.confirmPopup, el.confirmBackdrop);
+  }
+
+  el.confirmOkBtn.addEventListener("click", () => {
+    const action = pendingConfirmAction;
+    pendingConfirmAction = null;
+    closePopup(el.confirmPopup, el.confirmBackdrop);
+    if (action) action();
+  });
+  el.confirmCancelBtn.addEventListener("click", () => {
+    pendingConfirmAction = null;
+    closePopup(el.confirmPopup, el.confirmBackdrop);
+  });
+  el.confirmBackdrop.addEventListener("click", () => {
+    pendingConfirmAction = null;
+    closePopup(el.confirmPopup, el.confirmBackdrop);
   });
 
-  // ---------- Chord display mode toggle (Degree / Note) ----------
-  el.chordDisplayToggle.querySelectorAll(".chord-display-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      state.chordDisplayMode = btn.dataset.display;
-      el.chordDisplayToggle.querySelectorAll(".chord-display-btn").forEach(b => b.classList.remove("selected"));
-      btn.classList.add("selected");
+  el.progClearBtn.addEventListener("click", () => {
+    askConfirm("Clear Everything", "This will clear all chords and the current phrase. This can't be undone.", () => {
+      state.progression = new Array(state.numBars * 4).fill(null);
+      state.phrase = null;
       refreshProgGrid();
       renderTab();
     });
+  });
+
+  // ---------- Chord display mode toggle (Degree ⇔ Note、1ボタンでタップごとに切替) ----------
+  el.chordDisplayToggle.addEventListener("click", () => {
+    state.chordDisplayMode = state.chordDisplayMode === "degree" ? "absolute" : "degree";
+    el.chordDisplayToggle.textContent = state.chordDisplayMode === "degree" ? "Degree" : "Note";
+    refreshProgGrid();
+    renderTab();
   });
 
   // ---------- Bar count (1/2/4) selector — chip + popup (KEY/SCALE/POSと同じ形式) ----------
@@ -350,12 +373,14 @@
   // ============================================================
   let pendingChordDegree = 0;
   let pendingChordType = "";
+  let pendingChordOnBass = null; // null=OFF、それ以外はディグリー番号(0-6)
 
   function openChordPicker(idx) {
     state.editingBeatIndex = idx;
     const existing = state.progression[idx];
     pendingChordDegree = existing ? existing.degree : 0;
     pendingChordType = existing ? existing.type : DEGREES[pendingChordDegree].defaultType;
+    pendingChordOnBass = existing && existing.onBass !== undefined ? existing.onBass : null;
 
     const bar = Math.floor(idx / 4) + 1;
     const beat = (idx % 4) + 1;
@@ -363,6 +388,7 @@
 
     buildChordDegreeGrid();
     buildChordTypeGrid();
+    buildChordOnBassGrid();
     openPopup(el.chordPopup, el.chordBackdrop);
   }
 
@@ -402,9 +428,41 @@
     });
   }
 
+  // On Bass(分数コード): ベース音を別のディグリーに指定する機能。OFFボタン+7ディグリー
+  function buildChordOnBassGrid() {
+    el.chordOnBassGrid.innerHTML = "";
+    const offCell = document.createElement("div");
+    offCell.className = "choice-cell";
+    offCell.textContent = "OFF";
+    if (pendingChordOnBass === null) offCell.classList.add("selected");
+    offCell.addEventListener("click", () => {
+      pendingChordOnBass = null;
+      commitChordCell();
+      buildChordOnBassGrid();
+    });
+    el.chordOnBassGrid.appendChild(offCell);
+
+    DEGREES.forEach((def, idx) => {
+      const cell = document.createElement("div");
+      cell.className = "choice-cell";
+      cell.textContent = def.roman;
+      if (idx === pendingChordOnBass) cell.classList.add("selected");
+      cell.addEventListener("click", () => {
+        pendingChordOnBass = idx;
+        commitChordCell();
+        buildChordOnBassGrid();
+      });
+      el.chordOnBassGrid.appendChild(cell);
+    });
+  }
+
   function commitChordCell() {
     if (state.editingBeatIndex === null) return;
-    state.progression[state.editingBeatIndex] = { degree: pendingChordDegree, type: pendingChordType };
+    state.progression[state.editingBeatIndex] = {
+      degree: pendingChordDegree,
+      type: pendingChordType,
+      onBass: pendingChordOnBass,
+    };
     refreshProgGrid();
   }
 
@@ -531,6 +589,7 @@
   el.chordBackdrop.addEventListener("click", () => closePopup(el.chordPopup, el.chordBackdrop));
 
   wirePopup(el.settingsBtn, el.settingsPopup, el.settingsBackdrop, el.settingsCloseBtn);
+  wirePopup(el.hamburgerBtn, el.hamburgerPopup, el.hamburgerBackdrop, el.hamburgerCloseBtn);
 
   // Init
   buildKeyGrid();
@@ -638,6 +697,34 @@
   el.bpmMinus2.addEventListener("click", () => setBpm(state.bpm - 1));
   el.bpmPlus2.addEventListener("click", () => setBpm(state.bpm + 1));
 
+  // ---------- BPM数字を左右スワイプでシームレスに変更する ----------
+  (function wireBpmSwipe() {
+    let dragging = false;
+    let startX = 0;
+    let startBpm = 0;
+    const PX_PER_BPM = 6; // この幅だけ動かすとBPMが1変わる
+
+    el.bpmDisplayWrap.addEventListener("pointerdown", (ev) => {
+      dragging = true;
+      startX = ev.clientX;
+      startBpm = state.bpm;
+      el.bpmDisplayWrap.setPointerCapture(ev.pointerId);
+    });
+    el.bpmDisplayWrap.addEventListener("pointermove", (ev) => {
+      if (!dragging) return;
+      const deltaX = ev.clientX - startX;
+      const deltaBpm = Math.round(deltaX / PX_PER_BPM);
+      setBpm(startBpm + deltaBpm);
+    });
+    function endDrag(ev) {
+      if (!dragging) return;
+      dragging = false;
+      try { el.bpmDisplayWrap.releasePointerCapture(ev.pointerId); } catch (e) {}
+    }
+    el.bpmDisplayWrap.addEventListener("pointerup", endDrag);
+    el.bpmDisplayWrap.addEventListener("pointercancel", endDrag);
+  })();
+
   function refreshMetroBtn() {
     if (state.metronomeOn) el.metroToggle.classList.add("active");
     else el.metroToggle.classList.remove("active");
@@ -688,12 +775,15 @@
       const chord = ctx.resolvedProgression[beatIdx];
       if (!chord) continue;
       let label;
+      const hasBass = chord.bassRoot !== undefined && chord.bassRoot !== null;
       if (state.chordDisplayMode === "absolute") {
         const typeLabel = CHORD_TYPES[chord.type] ? CHORD_TYPES[chord.type].label : "";
         label = NOTE_NAMES[chord.root] + typeLabel;
+        if (hasBass) label += "/" + NOTE_NAMES[chord.bassRoot];
       } else {
         const degree = rootPcToDegree(chord.root, state.key);
-        label = degree !== null ? degreeToRoman(degree, chord.type) : NOTE_NAMES[chord.root] + (chord.type || "");
+        const bassDegree = hasBass ? rootPcToDegree(chord.bassRoot, state.key) : null;
+        label = degree !== null ? degreeToRoman(degree, chord.type, bassDegree) : NOTE_NAMES[chord.root] + (chord.type || "");
       }
       if (labels.length === 0 || labels[labels.length - 1] !== label) {
         labels.push(label);
@@ -844,14 +934,11 @@
     }
   }
 
-  // ---------- TAB display mode toggle (Fret / Degree) ----------
-  el.tabDisplayToggle.querySelectorAll(".chord-display-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      state.tabDisplayMode = btn.dataset.display;
-      el.tabDisplayToggle.querySelectorAll(".chord-display-btn").forEach(b => b.classList.remove("selected"));
-      btn.classList.add("selected");
-      renderTab();
-    });
+  // ---------- TAB display mode toggle (Fret ⇔ Degree、1ボタンでタップごとに切替) ----------
+  el.tabDisplayToggle.addEventListener("click", () => {
+    state.tabDisplayMode = state.tabDisplayMode === "fret" ? "degree" : "fret";
+    el.tabDisplayToggle.textContent = state.tabDisplayMode === "fret" ? "Fret" : "Degree";
+    renderTab();
   });
 
   // ============================================================
@@ -867,7 +954,11 @@
   function progressionToRootForm(progression, keyPc) {
     return progression.map(cell => {
       if (!cell) return null;
-      return { root: degreeToRootPc(cell.degree, keyPc), type: cell.type };
+      const result = { root: degreeToRootPc(cell.degree, keyPc), type: cell.type };
+      if (cell.onBass !== undefined && cell.onBass !== null) {
+        result.bassRoot = degreeToRootPc(cell.onBass, keyPc);
+      }
+      return result;
     });
   }
 
@@ -884,11 +975,7 @@
     setTimeout(() => renderTab(), 1800);
   }
 
-  el.generateBtn.addEventListener("click", () => {
-    if (!hasAnyChord()) {
-      showTabMessage("Set at least one chord first");
-      return;
-    }
+  function runGenerate() {
     const options = {
       key: state.key,
       scaleKey: state.scaleKey,
@@ -903,9 +990,30 @@
       scaleKey: options._resolvedRandomScale || state.scaleKey,
       resolvedProgression: resolveProgression(rootFormProgression),
     };
+    // 新しく生成したフレーズは元のストックとは別物なので、上書き対象から外す
+    // (SAVEすると常に新規保存になる。上書きしたい場合はSTOCKから読み込み直す)
+    state.currentStockId = null;
+    state.currentStockName = null;
     renderTab();
     // 生成のたびにランダムスケール解決値をリセット(次回また新規ランダム選択させる)
     delete options._resolvedRandomScale;
+  }
+
+  // 既存のフレーズ(手弾き入力ぶんを含む)に何かノートが入っているか判定する
+  function hasAnyNotes() {
+    return !!(state.phrase && state.phrase.some(beat => beat.notes.length > 0));
+  }
+
+  el.generateBtn.addEventListener("click", () => {
+    if (!hasAnyChord()) {
+      showTabMessage("Set at least one chord first");
+      return;
+    }
+    if (hasAnyNotes()) {
+      askConfirm("Generate New Phrase", "This will replace the current TAB (including any manual notes) with a new generated phrase.", runGenerate);
+    } else {
+      runGenerate();
+    }
   });
 
   // ============================================================
@@ -942,15 +1050,36 @@
   }
 
   // ---------- Save flow ----------
+  let saveMode = "new"; // "new" | "overwrite"
+
   el.saveBtn.addEventListener("click", () => {
     if (!state.phrase) {
       // フレーズ未生成の場合は保存できない旨をTAB欄に一瞬表示
       showTabMessage("Generate a phrase first");
       return;
     }
-    el.saveNameInput.value = "";
+    // 既にストックを読み込んで編集中なら、New/Overwriteを選べるようにする
+    if (state.currentStockId) {
+      el.saveModeRow.style.display = "flex";
+      saveMode = "overwrite";
+      el.saveModeRow.querySelectorAll(".save-mode-btn").forEach(b => {
+        b.classList.toggle("selected", b.dataset.mode === saveMode);
+      });
+      el.saveNameInput.value = state.currentStockName || "";
+    } else {
+      el.saveModeRow.style.display = "none";
+      saveMode = "new";
+      el.saveNameInput.value = "";
+    }
     openPopup(el.saveNamePopup, el.saveNameBackdrop);
     setTimeout(() => el.saveNameInput.focus(), 250);
+  });
+
+  el.saveModeRow.querySelectorAll(".save-mode-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      saveMode = btn.dataset.mode;
+      el.saveModeRow.querySelectorAll(".save-mode-btn").forEach(b => b.classList.toggle("selected", b === btn));
+    });
   });
 
   el.saveNameConfirmBtn.addEventListener("click", () => {
@@ -961,11 +1090,9 @@
     const rawName = el.saveNameInput.value.trim();
     const name = rawName || (NOTE_NAMES[state.key] + " " + (state.scaleKey === "random" ? "Random" : SCALES[state.scaleKey].label));
 
-    const entry = {
-      id: "phrase_" + Date.now() + "_" + Math.floor(Math.random() * 10000),
+    const entryData = {
       name: name,
       savedAt: new Date().toISOString(),
-      favorite: false,
       // 完全再現に必要な状態一式
       key: state.key,
       scaleKey: state.scaleKey,
@@ -978,9 +1105,28 @@
     };
 
     const list = loadStock();
-    list.unshift(entry); // 新しいものを先頭に
-    saveStockList(list);
 
+    if (saveMode === "overwrite" && state.currentStockId) {
+      // 既存エントリを見つけて内容だけ更新する(id・favoriteは維持する)
+      const idx = list.findIndex(e => e.id === state.currentStockId);
+      if (idx !== -1) {
+        list[idx] = Object.assign({}, list[idx], entryData);
+      } else {
+        // 元のエントリが既に削除されていた場合は新規として保存する
+        entryData.id = "phrase_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+        entryData.favorite = false;
+        list.unshift(entryData);
+        state.currentStockId = entryData.id;
+      }
+    } else {
+      entryData.id = "phrase_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+      entryData.favorite = false;
+      list.unshift(entryData); // 新しいものを先頭に
+      state.currentStockId = entryData.id;
+    }
+    state.currentStockName = name;
+
+    saveStockList(list);
     closePopup(el.saveNamePopup, el.saveNameBackdrop);
   });
 
@@ -1081,6 +1227,9 @@
       scaleKey: entry.scaleKey,
       resolvedProgression: resolveProgression(progressionToRootForm(state.progression, entry.key)),
     };
+    // どのストックを読み込んで編集中かを記録しておく(SAVE時の上書き判定に使う)
+    state.currentStockId = entry.id;
+    state.currentStockName = entry.name;
 
     refreshKeyChip();
     refreshScaleChip();
@@ -1126,6 +1275,11 @@
   });
   syncSpacer();
   buildBarBlocks();
+
+  // ---------- Bottom transport shortcuts (Generate/Save/Load) — 既存ボタンのクリックを中継する ----------
+  el.transportGenerateBtn.addEventListener("click", () => el.generateBtn.click());
+  el.transportSaveBtn.addEventListener("click", () => el.saveBtn.click());
+  el.transportLoadBtn.addEventListener("click", () => el.stockBtn.click());
 
   // Expose state to other script chunks in this file
   window.__qnphrase = { state, el, tempoNameFor, POSITION_PRESETS, renderTab, syncSpacer };
@@ -1286,7 +1440,11 @@
     // degree形式のprogressionを、キーに応じた絶対root形式に変換してから解析する
     const rootFormProgression = state.progression.map(cell => {
       if (!cell) return null;
-      return { root: degreeToRootPc(cell.degree, state.key), type: cell.type };
+      const result = { root: degreeToRootPc(cell.degree, state.key), type: cell.type };
+      if (cell.onBass !== undefined && cell.onBass !== null) {
+        result.bassRoot = degreeToRootPc(cell.onBass, state.key);
+      }
+      return result;
     });
     const changes = resolveChordChanges(rootFormProgression);
     changes.forEach(ch => chordChangeMap.set(ch.beatIdx, ch));
@@ -1311,10 +1469,15 @@
       if (change) {
         const tones = chordPitchClasses(change.root, change.type || "");
         const sustainSec = stepSec * 4 * change.durationBeats * 0.98;
+        // onBass(分数コード)が指定されている場合、最低音(ベース)をそのピッチクラスに差し替える
+        const bassPc = (change.bassRoot !== undefined && change.bassRoot !== null) ? change.bassRoot : change.root;
+        const baseBassMidi = 36 + bassPc;
+        playChordTone(440 * Math.pow(2, (baseBassMidi - 69) / 12), time, sustainSec, true);
         tones.forEach((tonePc, i) => {
-          const baseMidi = 36 + tonePc + (i === 0 ? 0 : 12); // ルートはC2域、他は1オクターブ上
+          if (i === 0) return; // ルート(通常のベース位置)はonBassのベース音で代替済みなのでスキップ
+          const baseMidi = 36 + tonePc + 12; // 3rd/5th等は1オクターブ上
           const freq = 440 * Math.pow(2, (baseMidi - 69) / 12);
-          playChordTone(freq, time, sustainSec, i === 0);
+          playChordTone(freq, time, sustainSec, false);
         });
       }
     }
