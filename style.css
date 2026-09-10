@@ -55,7 +55,7 @@ body {
   max-width: 1400px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   position: relative;
   z-index: 200;
   flex-shrink: 0;
