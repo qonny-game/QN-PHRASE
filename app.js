@@ -85,7 +85,6 @@
     "noteLengthToggleRow", "noteLengthTotal", "noteClearBtn", "noteInputConfirmBtn",
     "chordDisplayToggle",
     "settingsBtn", "settingsBackdrop", "settingsPopup", "rhythmFeelGrid", "metronomeToggleGrid", "chordToneToggleGrid", "settingsCloseBtn",
-    "hamburgerBtn", "hamburgerBackdrop", "hamburgerPopup", "hamburgerCloseBtn",
     "melodyVolumeSlider", "melodyVolumeValue", "chordVolumeSlider", "chordVolumeValue",
     "bpmVal", "tempoName", "bpmMinus2", "bpmPlus2", "bpmDisplayWrap", "playToggle", "playIcon", "metroToggle",
   ].forEach(id => { el[id] = document.getElementById(id); });
@@ -589,7 +588,6 @@
   el.chordBackdrop.addEventListener("click", () => closePopup(el.chordPopup, el.chordBackdrop));
 
   wirePopup(el.settingsBtn, el.settingsPopup, el.settingsBackdrop, el.settingsCloseBtn);
-  wirePopup(el.hamburgerBtn, el.hamburgerPopup, el.hamburgerBackdrop, el.hamburgerCloseBtn);
 
   // Init
   buildKeyGrid();

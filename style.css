@@ -69,24 +69,6 @@ body {
   min-width: 0;
 }
 
-#hamburgerBtn {
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #16161b;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  cursor: pointer;
-  color: #f0f0f3;
-  transition: background var(--dur-hover) var(--ease-snap), border-color var(--dur-hover) var(--ease-snap), color var(--dur-hover) var(--ease-snap), transform var(--dur-press) var(--ease-snap);
-}
-#hamburgerBtn svg { width: 20px; height: 20px; fill: currentColor; }
-#hamburgerBtn:hover { background: #1c1c24; border-color: var(--accent-primary); color: var(--accent-primary); }
-#hamburgerBtn:active { transform: scale(0.94); }
-
 #appHeaderText { min-width: 0; }
 
 #appLogo {
@@ -109,68 +91,6 @@ body {
   text-transform: none;
   vertical-align: middle;
 }
-
-#headerControls {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.header-btn-wrapper { position: relative; }
-
-/* ---------- Hamburger menu popup ---------- */
-.hamburger-link-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-.hamburger-link {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: #1c1c24;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #c8c8d0;
-  text-decoration: none;
-  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  transition: background var(--dur-hover) var(--ease-snap), border-color var(--dur-hover) var(--ease-snap), color var(--dur-hover) var(--ease-snap);
-}
-.hamburger-link svg { width: 20px; height: 20px; fill: currentColor; flex-shrink: 0; }
-.hamburger-link:active { transform: scale(0.98); }
-.hamburger-link.current {
-  color: var(--accent-primary);
-  border-color: var(--accent-primary);
-  background: var(--accent-glow);
-}
-
-#settingsBtn {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: #16161b;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  cursor: pointer;
-  color: #f0f0f3;
-  font-family: var(--font-display, 'Instrument Sans'), sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  transition: background var(--dur-hover) var(--ease-snap), border-color var(--dur-hover) var(--ease-snap), color var(--dur-hover) var(--ease-snap), transform var(--dur-press) var(--ease-snap);
-}
-#settingsBtn:active { transform: scale(0.96); }
-#settingsBtn:hover { background: #1c1c24; border-color: var(--accent-primary); color: var(--accent-primary); }
-#settingsBtn svg { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
 
 /* ---------- Control bar: Key / Scale / Position chips ---------- */
 .control-bar {
