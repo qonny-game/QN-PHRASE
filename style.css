@@ -54,29 +54,19 @@ body {
   width: 100%;
   max-width: 1400px;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
+  align-items: center;
+  gap: 12px;
   position: relative;
   z-index: 200;
   flex-shrink: 0;
 }
-
-#appHeaderLeft {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-#appHeaderText { min-width: 0; }
 
 #appLogo {
   font-family: var(--font-display, 'Instrument Sans'), sans-serif;
   font-size: 32px;
   font-weight: 700;
   letter-spacing: 1px;
-  margin: 0 0 4px;
+  margin: 0;
   color: #f0f0f3;
   text-transform: uppercase;
 }
